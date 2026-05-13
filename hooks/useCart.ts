@@ -2,7 +2,7 @@ import { useReducer, useMemo, useCallback } from "react";
 
 import type { CartItem, CartAction, AppMoney } from "@/types/app";
 
-const cartReducer = (state: CartItem[], action: CartAction): CartItem[] => {
+export const cartReducer = (state: CartItem[], action: CartAction): CartItem[] => {
   switch (action.type) {
     case "ADD": {
       const existing = state.find(
