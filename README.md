@@ -224,6 +224,8 @@ constants/
 
 **Full cursor pagination** — The current single-page fetch (limit 1,000) covers every reasonable restaurant menu. For a marketplace with thousands of items, implement `while (cursor) { ... }` pagination in `fetchCatalog`.
 
+**Redis-backed cache** — The current in-memory TTL cache resets on every server restart and is not shared across multiple server instances. Replacing `lib/cache.ts` with Redis would make the cache persistent, shared, and horizontally scalable with no changes to the route handler call sites.
+
 **Webhook-driven cache invalidation** — The 5-minute TTL is a coarse approximation. A Square `catalog.version.updated` webhook would let the server invalidate the cache immediately when the merchant changes their menu.
 
 **API-based search** — Client-side filtering is the right call when the catalog is in memory. At scale (thousands of items, partial loads), switch to Square's `searchCatalogObjects` `textFilter` with server-side debounce and streaming results.
