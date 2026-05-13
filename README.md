@@ -70,7 +70,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 The app needs at least one active location with catalog items. Use the **Sandbox Seller Dashboard** (linked from your app's Sandbox tab):
 
-1. **Locations** — Go to _Account & Settings → Locations_. Two locations exist by default. Rename them (e.g. "Downtown", "Australia") and verify each has a timezone set under _Location details → Opening hours_.
+1. **Locations** — Go to _Account & Settings → Locations_. Setup 2 locations along with timezone and then finally set Opening hours.
 
 2. **Items** — Go to _Items → Item Library_ and create 6–10 items across 3–4 categories (e.g. Breakfast, Lunch, Drinks, Desserts). Add images and prices. To exercise location filtering, mark at least one item as available only at a specific location.
 
@@ -81,8 +81,6 @@ The app needs at least one active location with catalog items. Use the **Sandbox
    ```
 
    Edit `scripts/seed-availability.ts` to set your `CATEGORY_NAME` and `PERIODS` (each period = one day + time window). The script creates all periods in a single batch upsert and links them to the category. After running, hard-refresh the browser (`Ctrl+Shift+R`) to bypass the 5-minute catalog cache.
-
-4. **Inventory** _(optional)_ — Set stock counts under _Items → Inventory_ to see in-stock / sold-out badges in the item detail modal.
 
 ---
 
