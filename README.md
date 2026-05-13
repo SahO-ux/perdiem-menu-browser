@@ -236,4 +236,4 @@ constants/
 
 **Offline support** — Cache the last-known catalog response in `localStorage` (stale-while-revalidate) so the menu renders immediately on repeat visits even without a network connection.
 
-**CDN for images** — Route Square's S3 image URLs through a CDN (Cloudflare Images or a Next.js custom image loader) for faster loads and reduced dependency on Square's CDN uptime.
+**CDN for images** — Route Square's S3 image URLs through a CDN (Cloudflare Images or a Next.js custom image loader) for faster loads and reduced dependency on Square's CDN uptime. Also replace current approach of rendering images directly with optimizations like lazy-loading of images and other practices.
