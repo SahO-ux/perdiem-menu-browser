@@ -80,7 +80,7 @@ The app needs at least one active location with catalog items. Use the **Sandbox
    npm run seed:availability
    ```
 
-   Edit `scripts/seed-availability.ts` to set your `CATEGORY_NAME` and `PERIODS` (each period = one day + time window). The script creates all periods in a single batch upsert and links them to the category. After running, hard-refresh the browser (`Ctrl+Shift+R`) to bypass the 5-minute catalog cache.
+   Edit `scripts/seed-availability.ts` to set your `CATEGORY_NAME` and `PERIODS` (each period = one day + time window). The script creates all periods in a single batch upsert and links them to the category. After running, re-run the "npm run dev" command to bypass the 5-minute catalog in-memory server cache.
 
 ---
 
@@ -115,7 +115,7 @@ All Square API calls happen inside Next.js route handlers (`/api/catalog`, `/api
 
 ### In-memory TTL cache
 
-Each route handler holds a 5-minute in-memory TTL cache (a `Map` keyed by route). On a cold request the handler fetches from Square; subsequent requests within the TTL return instantly. Trade-off: the cache resets on every server restart and is not shared across multiple server instances. For a single-instance dev/demo setup this is appropriate; production would use Redis or Vercel KV.
+Each route handler holds a 5-minute in-memory TTL cache (a `Map` keyed by route). On a cold request the handler fetches from Square; subsequent requests within the TTL return instantly. Trade-off: the cache resets on every server restart and is not shared across multiple server instances. For a single-instance dev/demo setup this is appropriate; production would use Redis.
 
 ### Single-page catalog fetch
 
@@ -143,7 +143,7 @@ Search filters over the already-loaded catalog in memory. An API round-trip via 
 
 ### Smart cart on location switch
 
-Switching locations used to clear the entire cart. It now checks each item against the new location's `presentAtAllLocations` / `presentAtLocationIds` / `absentAtLocationIds` fields — already present on every `CartItem.menuItem` — and removes only items that don't exist at the new location. Items shared between locations are kept silently; the toast only fires if something was actually dropped.
+Earlier in ine implementation, switching locations used to clear the entire cart. It now checks each item against the new location's `presentAtAllLocations` / `presentAtLocationIds` / `absentAtLocationIds` fields — already present on every `CartItem.menuItem` — and removes only items that don't exist at the new location. Items shared between locations are kept silently; the toast only fires if something was actually dropped.
 
 ### Error handling — two tiers
 
@@ -229,6 +229,10 @@ constants/
 **Webhook-driven cache invalidation** — The 5-minute TTL is a coarse approximation. A Square `catalog.version.updated` webhook would let the server invalidate the cache immediately when the merchant changes their menu.
 
 **API-based search** — Client-side filtering is the right call when the catalog is in memory. At scale (thousands of items, partial loads), switch to Square's `searchCatalogObjects` `textFilter` with server-side debounce and streaming results.
+
+**Axiom based error logging** — Instead of using plain server-side logging via `console.log` or `console.error`, we should use axiom logger, so it's easier to monitor logs via axiom dashboards since it offers custom querying of logs.
+
+**Improve UI/UX** — The current version of the web app has simple and plain design which should definitely be updated to match the current standards of real-world apps.
 
 **Persistent cart + auth** — Move cart state to a backend session (Redis) so guests can resume across page reloads or devices. Add Square OAuth so merchants authenticate with their own account.
 
