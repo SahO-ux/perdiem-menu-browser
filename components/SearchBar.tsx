@@ -6,10 +6,11 @@ interface SearchBarProps {
   value: string;
   onChange: (query: string) => void;
   loading?: boolean;
+  disabled?: boolean;
 }
 
 export const SearchBar = memo(
-  ({ value, onChange, loading = false }: SearchBarProps) => {
+  ({ value, onChange, loading = false, disabled = false }: SearchBarProps) => {
     const handleChange = useCallback(
       (e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value),
       [onChange],
@@ -55,8 +56,9 @@ export const SearchBar = memo(
           type="search"
           value={value}
           onChange={handleChange}
+          disabled={disabled}
           placeholder="Search menu..."
-          className="w-full rounded-lg border border-input bg-background pl-9 pr-4 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          className="w-full rounded-lg border border-input bg-background pl-9 pr-4 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 disabled:pointer-events-none"
         />
       </div>
     );

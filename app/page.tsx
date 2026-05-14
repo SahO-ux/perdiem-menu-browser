@@ -195,23 +195,23 @@ export default function Home() {
         </div>
       </header>
 
-      {/* ── Filter bar — only when locations are ready ──────────── */}
-      {locationsReady && (
-        <div className="shrink-0 border-b bg-background">
-          <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-            <CategoryFilter
-              categories={availableCategories}
-              selectedId={selectedCategoryId}
-              onChange={setSelectedCategoryId}
-            />
-            <SearchBar
-              value={searchQuery}
-              onChange={setSearchQuery}
-              loading={isSearchPending}
-            />
-          </div>
+      {/* ── Filter bar — always rendered; disabled until locations resolve ── */}
+      <div className="shrink-0 border-b bg-background">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+          <CategoryFilter
+            categories={availableCategories}
+            selectedId={selectedCategoryId}
+            onChange={setSelectedCategoryId}
+            disabled={!locationsReady}
+          />
+          <SearchBar
+            value={searchQuery}
+            onChange={setSearchQuery}
+            loading={isSearchPending}
+            disabled={!locationsReady}
+          />
         </div>
-      )}
+      </div>
 
       {/* ── Content ────────────────────────────────────────────── */}
       <div className="flex-1 min-h-0 overflow-hidden">
