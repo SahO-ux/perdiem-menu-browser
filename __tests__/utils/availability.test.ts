@@ -2,8 +2,9 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   isAvailableAtLocation,
   isAvailableNow,
+  isLocationOpen,
 } from "@/lib/utils/availability";
-import type { AppMenuItem, AppAvailabilityPeriod } from "@/types/app";
+import type { AppMenuItem, AppAvailabilityPeriod, AppBusinessHoursPeriod } from "@/types/app";
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -127,5 +128,50 @@ describe("isAvailableNow", () => {
       makePeriod("MON", "10:00:00", "15:00:00"), // this one matches
     ];
     expect(isAvailableNow(periods, TZ)).toBe(true);
+  });
+});
+
+// ── isLocationOpen ────────────────────────────────────────────────────────────
+
+const makeBusinessHours = (
+  day: string,
+  start: string,
+  end: string,
+): AppBusinessHoursPeriod => ({ dayOfWeek: day, startLocalTime: start, endLocalTime: end });
+
+describe("isLocationOpen", () => {
+  const TZ = "America/New_York";
+
+  beforeEach(() => { vi.useFakeTimers(); });
+  afterEach(() => { vi.useRealTimers(); });
+
+  it("returns true when no business hours are configured (always open)", () => {
+    vi.setSystemTime(MON_12PM_UTC);
+    expect(isLocationOpen([], TZ)).toBe(true);
+  });
+
+  it("returns true when current time is within a matching business-hours period", () => {
+    vi.setSystemTime(MON_12PM_UTC); // Monday 12:00 EST — within 09:00–17:00
+    const hours = [makeBusinessHours("MON", "09:00:00", "17:00:00")];
+    expect(isLocationOpen(hours, TZ)).toBe(true);
+  });
+
+  it("returns false when the location is closed for the day", () => {
+    vi.setSystemTime(MON_12PM_UTC); // Monday — no Monday period
+    const hours = [makeBusinessHours("TUE", "09:00:00", "17:00:00")];
+    expect(isLocationOpen(hours, TZ)).toBe(false);
+  });
+
+  it("returns false when current time is after closing time", () => {
+    vi.setSystemTime(new Date("2024-01-08T23:00:00Z")); // Monday 18:00 EST
+    const hours = [makeBusinessHours("MON", "09:00:00", "17:00:00")];
+    expect(isLocationOpen(hours, TZ)).toBe(false);
+  });
+
+  it("category window open but location closed → item unavailable", () => {
+    // 17:01 EST — category period starts at 17:00 but location closes at 17:00
+    vi.setSystemTime(new Date("2024-01-08T22:01:00Z")); // Monday 17:01 EST
+    const hours = [makeBusinessHours("MON", "09:00:00", "17:00:00")];
+    expect(isLocationOpen(hours, TZ)).toBe(false);
   });
 });

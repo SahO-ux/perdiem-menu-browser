@@ -3,6 +3,12 @@ export interface AppMoney {
   currency: string;
 }
 
+export interface AppBusinessHoursPeriod {
+  dayOfWeek: string;
+  startLocalTime: string; // "HH:MM:SS"
+  endLocalTime: string; // "HH:MM:SS"
+}
+
 export interface AppLocation {
   id: string;
   name: string;
@@ -12,6 +18,8 @@ export interface AppLocation {
     locality?: string;
     administrativeDistrictLevel1?: string;
   };
+  /** Empty array means no hours configured — treat as always open */
+  businessHours: AppBusinessHoursPeriod[];
 }
 
 export interface AppItemVariation {

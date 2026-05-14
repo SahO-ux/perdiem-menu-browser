@@ -57,6 +57,7 @@ export default function Home() {
   } = useCatalog({
     locationId: selectedLocationId,
     locationTimezone: selectedLocation?.timezone ?? DEFAULT_TIMEZONE,
+    locationBusinessHours: selectedLocation?.businessHours ?? [],
     categoryId: selectedCategoryId,
     searchQuery,
   });

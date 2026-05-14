@@ -4,6 +4,7 @@ import { useDebounce } from "./useDebounce";
 import {
   isAvailableAtLocation,
   isAvailableNow,
+  isLocationOpen,
 } from "@/lib/utils/availability";
 import type {
   CatalogData,
@@ -11,11 +12,13 @@ import type {
   AppModifierList,
   AppAvailabilityPeriod,
   AppMenuItem,
+  AppBusinessHoursPeriod,
 } from "@/types/app";
 
 interface UseCatalogOptions {
   locationId: string | null;
   locationTimezone: string;
+  locationBusinessHours: AppBusinessHoursPeriod[];
   categoryId: string | null;
   searchQuery: string;
 }
@@ -38,6 +41,7 @@ interface UseCatalogResult {
 export const useCatalog = ({
   locationId,
   locationTimezone,
+  locationBusinessHours,
   categoryId,
   searchQuery,
 }: UseCatalogOptions): UseCatalogResult => {
@@ -91,10 +95,15 @@ export const useCatalog = ({
       isAvailableAtLocation(item, locationId),
     );
 
-    // Step 2 — annotate each item with whether its category is currently orderable.
-    // Items outside their time window are shown but visually disabled, not hidden,
+    // Step 2 — annotate each item with whether it is currently orderable.
+    // Both the location's business hours AND the category's availability window
+    // must be open. Items outside either window are shown but visually disabled
     // so guests understand why they can't order rather than wondering where items went.
+    const locationCurrentlyOpen = isLocationOpen(locationBusinessHours, locationTimezone);
+
     const timeAnnotated: VisibleItem[] = locationFiltered.map((item) => {
+      if (!locationCurrentlyOpen) return { item, availableNow: false };
+
       const category = item.categoryId
         ? categoryById.get(item.categoryId)
         : undefined;
@@ -139,6 +148,7 @@ export const useCatalog = ({
     catalog,
     locationId,
     locationTimezone,
+    locationBusinessHours,
     categoryId,
     debouncedSearchQuery,
     availabilityPeriodById,
