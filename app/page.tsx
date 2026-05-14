@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { useLocations } from "@/hooks/useLocations";
 import { useCatalog } from "@/hooks/useCatalog";
@@ -142,19 +143,12 @@ export default function Home() {
     [addItem],
   );
 
-  // Locations are the backbone — block rendering until they resolve
-  if (locationsLoading) return <LoadingState />;
-  if (locationsError)
-    return <ErrorState message={locationsError} onRetry={refetchLocations} />;
-  if (locations.length === 0) {
-    return (
-      <EmptyState message="No active locations found. Check your Square sandbox setup." />
-    );
-  }
+  const locationsReady =
+    !locationsLoading && !locationsError && locations.length > 0;
 
   return (
     <div className="flex flex-col h-full">
-      {/* ── Header ─────────────────────────────────────────────── */}
+      {/* ── Header — always rendered so the navbar never pops in ── */}
       <header className="shrink-0 border-b sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
           <h1 className="font-semibold text-sm sm:text-base shrink-0">
@@ -162,13 +156,15 @@ export default function Home() {
           </h1>
 
           <div className="flex items-center gap-3 ml-auto">
-            {selectedLocationId && (
+            {locationsLoading ? (
+              <Skeleton className="h-8 w-32 rounded-md" />
+            ) : selectedLocationId ? (
               <LocationSwitcher
                 locations={locations}
                 selectedId={selectedLocationId}
                 onChange={handleLocationChange}
               />
-            )}
+            ) : null}
 
             {/* Cart button */}
             <button
@@ -199,26 +195,34 @@ export default function Home() {
         </div>
       </header>
 
-      {/* ── Filter bar ─────────────────────────────────────────── */}
-      <div className="shrink-0 border-b bg-background">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-          <CategoryFilter
-            categories={availableCategories}
-            selectedId={selectedCategoryId}
-            onChange={setSelectedCategoryId}
-          />
-          <SearchBar
-            value={searchQuery}
-            onChange={setSearchQuery}
-            loading={isSearchPending}
-          />
+      {/* ── Filter bar — only when locations are ready ──────────── */}
+      {locationsReady && (
+        <div className="shrink-0 border-b bg-background">
+          <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+            <CategoryFilter
+              categories={availableCategories}
+              selectedId={selectedCategoryId}
+              onChange={setSelectedCategoryId}
+            />
+            <SearchBar
+              value={searchQuery}
+              onChange={setSearchQuery}
+              loading={isSearchPending}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Content ────────────────────────────────────────────── */}
       <div className="flex-1 min-h-0 overflow-hidden">
         <div className="max-w-7xl mx-auto h-full">
-          {catalogLoading ? (
+          {locationsLoading ? (
+            <LoadingState />
+          ) : locationsError ? (
+            <ErrorState message={locationsError} onRetry={refetchLocations} />
+          ) : locations.length === 0 ? (
+            <EmptyState message="No active locations found. Check your Square sandbox setup." />
+          ) : catalogLoading ? (
             <LoadingState />
           ) : catalogError ? (
             <ErrorState message={catalogError} onRetry={refetchCatalog} />
